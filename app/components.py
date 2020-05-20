@@ -29,9 +29,9 @@ class Field(ttk.Frame):
         self.button['text'] = ''
 
 
-class Board(tk.Frame):
+class Board(ttk.Frame):
     def __init__(self, master, size, **kw):
-        super().__init__(master=master, width=size, height=size, bg='red', **kw)
+        super().__init__(master=master, width=size, height=size, **kw)
 
         self.size = size
         self.field_size = size // 3

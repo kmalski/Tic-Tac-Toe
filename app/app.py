@@ -10,6 +10,7 @@ class App (tk.Tk):
         super().__init__(*args, **kwargs)
         self.title('Tic-Tac-Toe')
         self.geometry('300x300+500+200')
+        self.resizable(width=False, height=False)
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
