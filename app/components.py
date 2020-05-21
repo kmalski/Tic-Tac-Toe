@@ -1,39 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
-from typing import Tuple
-from collections import defaultdict
 from tkinter import messagebox
-from dataclasses import dataclass
 
-
-@dataclass(eq=True, order=True, frozen=True)
-class Move:
-    r: int
-    c: int
-
-
-class Player:
-    def __init__(self, mark, human=True):
-        self.mark = mark
-        self.moves = []
-        self.human = human
-        self.row = [0] * 3
-        self.col = [0] * 3
-        self.diag = 0
-        self.anti_diag = 0
-
-    @classmethod
-    def create_opponent(cls, player):
-        enemy_mark = 'O' if player.mark == 'X' else 'X'
-        return cls(mark=enemy_mark, human=not player.human)
-
-    def starts(self):
-        return self.mark == 'X'
-
-    def __str__(self):
-        if self.human:
-            return 'Player'
-        return 'Computer'
+from players import Human, Computer, Move
 
 
 class Field(ttk.Frame):
@@ -47,10 +16,10 @@ class Field(ttk.Frame):
     def is_marked(self):
         return self.button['text'] != ''
 
-    def mark(self):
+    def get_mark(self):
         return self.button['text']
 
-    def set_text(self, mark):
+    def set_mark(self, mark):
         if not self.is_marked():
             self.button['text'] = mark
             return True
@@ -68,46 +37,36 @@ class Board(ttk.Frame):
         self.field_size = size // 3
         self.moves_count = 0
 
-        self.player = Player(mark=player_mark)
-        self.computer = Player.create_opponent(self.player)
+        self.human = Human(mark=player_mark, board=self)
+        self.computer = self.human.create_opponent()
 
         self.add_fields()
-
-        if not self.player.starts():
-            self.ai_make_move()
 
     def add_fields(self):
         self.fields = []
         for i in range(3):
             fields_row = []
             for j in range(3):
-                field = Field(master=self, size=self.field_size, command=lambda i=i, j=j: self.mark_field(i, j))
+                field = Field(master=self, size=self.field_size, command=lambda i=i, j=j: self.next_turn(i, j))
                 field.grid(row=i, column=j)
                 fields_row.append(field)
             self.fields.append(fields_row)
 
-    def mark_field(self, i, j):
-        marked = self.fields[i][j].set_text(self.player.mark)
-        if marked:
-            self.player.moves.append(Move(i, j))
-            self.check_state(self.player)
+    def next_turn(self, i, j):
+        if self.human.make_move(i, j):
+            curr_status = self.check_game_status(self.human)
 
-            # self.ai_make_move()
-            # self.check_state(self.computer)
+            if curr_status is None:
+                self.computer.make_move()
+                self.check_game_status(self.computer)
 
-    def ai_make_move(self):
-        pass
-
-    def check_state(self, player):
-        self.moves_count += 1
+    def check_game_status(self, player):
         if self.moves_count == 9:
-            if messagebox.askyesno('Draw!\nDo you wish to play again?'):
-                self.new_game()
-            else:
-                self.end_game()
+            self.display_result('Nobody')
+            return 'Draw'
 
-        r = player.moves[-1].r
-        c = player.moves[-1].c
+        r = player.moves[-1].i
+        c = player.moves[-1].j
         board_size = 3
 
         player.row[r] += 1
@@ -119,11 +78,16 @@ class Board(ttk.Frame):
 
         if (player.row[r] == board_size or player.col[c] == board_size
                 or player.diag == board_size or player.anti_diag == board_size):
+            self.display_result(player)
+            return str(player)
 
-            if messagebox.askyesno(f'{player} won!', f'{player} won!\nDo you wish to play again?'):
-                self.new_game()
-            else:
-                self.end_game()
+        return None
+
+    def display_result(self, player):
+        if messagebox.askyesno(f'{player} won!', f'{player} won!\nDo you wish to play again?'):
+            self.new_game()
+        else:
+            self.end_game()
 
     def new_game(self):
         self.grid_remove()
@@ -132,3 +96,13 @@ class Board(ttk.Frame):
 
     def end_game(self):
         self.master.destroy()
+
+    def to_matrix(self):
+        matrix = []
+        for i in range(3):
+            row = []
+            for j in range(3):
+                row.append(self.fields[i][j].get_mark())
+            matrix.append(row)
+
+        return matrix

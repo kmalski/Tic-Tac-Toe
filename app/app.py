@@ -40,6 +40,9 @@ class App (tk.Tk):
         self.board = Board(master=self, size=300, player_mark=self.player_mark)
         self.board.grid()
 
+        if not self.board.human.starts():
+            self.board.computer.make_first_move()
+            self.board.check_game_status(self.board.computer)
 
 if (__name__ == '__main__'):
     app = App()
