@@ -66,6 +66,7 @@ class Board(ttk.Frame):
 
         self.size = size
         self.field_size = size // 3
+        self.moves_count = 0
 
         self.player = Player(mark=player_mark)
         self.computer = Player.create_opponent(self.player)
@@ -98,6 +99,13 @@ class Board(ttk.Frame):
         pass
 
     def check_state(self, player):
+        self.moves_count += 1
+        if self.moves_count == 9:
+            if messagebox.askyesno('Draw!\nDo you wish to play again?'):
+                self.new_game()
+            else:
+                self.end_game()
+
         r = player.moves[-1].r
         c = player.moves[-1].c
         board_size = 3
