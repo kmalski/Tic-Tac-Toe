@@ -14,9 +14,9 @@ class App (tk.Tk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        self.__pick_mark()
+        self.pick_mark()
 
-    def __pick_mark(self):
+    def pick_mark(self):
         self.start_frame = ttk.Frame(master=self)
         self.start_frame.grid()
         self.start_frame.grid_rowconfigure(0, weight=1)
@@ -26,19 +26,19 @@ class App (tk.Tk):
 
         ttk.Label(master=self.start_frame, text='Pick a mark (X starts)', font=('Roboto', '16'))\
             .grid(row=0, column=0, pady=30)
-        ttk.Button(master=self.start_frame, text='X', width=20, command=lambda: self.__set_player_mark('X'))\
+        ttk.Button(master=self.start_frame, text='X', width=20, command=lambda: self.set_player_mark('X'))\
             .grid(row=1, column=0, pady=3)
-        ttk.Button(master=self.start_frame, text='O', width=20, command=lambda: self.__set_player_mark('O'))\
+        ttk.Button(master=self.start_frame, text='O', width=20, command=lambda: self.set_player_mark('O'))\
             .grid(row=2, column=0, pady=3)
 
-    def __set_player_mark(self, side):
+    def set_player_mark(self, side):
         self.player_mark = side
         self.start_frame.destroy()
-        self.__add_board()
+        self.add_board()
 
-    def __add_board(self):
-        self.board = Board(master=self, size=300)
-        self.board.pack(fill='both', expand=True)
+    def add_board(self):
+        self.board = Board(master=self, size=300, player_mark=self.player_mark)
+        self.board.grid()
 
 
 if (__name__ == '__main__'):
