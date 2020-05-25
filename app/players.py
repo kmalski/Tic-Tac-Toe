@@ -75,7 +75,7 @@ class Computer(Player):
         self.board.fields[move.i][move.j].set_mark(self.mark)
         self.moves.append(move)
 
-    def minimax(self, fields, is_maximizing):
+    def minimax(self, fields, is_maximizing, alpha = -inf, beta = inf):
         res = self.check_winner(fields)
         if res is not None:
             return self.scores[res]
@@ -86,9 +86,14 @@ class Computer(Player):
                 for j in range(3):
                     if fields[i][j] == '':
                         fields[i][j] = self.mark
-                        score = self.minimax(fields, False)
+                        score = self.minimax(fields, False, alpha, beta)
                         fields[i][j] = ''
                         best_score = max(score, best_score)
+
+                        if best_score >= beta:
+                            return best_score
+                        
+                        alpha = max(best_score, alpha)
             return best_score
         else:
             best_score = inf
@@ -96,9 +101,14 @@ class Computer(Player):
                 for j in range(3):
                     if fields[i][j] == '':
                         fields[i][j] = self.enemy.mark
-                        score = self.minimax(fields, True)
+                        score = self.minimax(fields, True, alpha, beta)
                         fields[i][j] = ''
                         best_score = min(score, best_score)
+
+                        if best_score <= alpha:
+                            return best_score
+                        
+                        beta = min(best_score, beta)
             return best_score
 
     def check_winner(self, fields):
